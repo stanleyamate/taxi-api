@@ -30,7 +30,18 @@ export const register = async (req, res) =>{
       isDriver
     })
       const user = await newUser.save()
-      res.status(201).json({user, message:{ msg:"Registration successful", success:true}})
+      user= user.map(()=>{
+        username,
+        fullName,
+        phone,
+        pin,
+        profilePic,
+        valideDoc,
+        isAdmin,
+        isDriver
+      })
+      res.status(201).json({user
+        , message:{ msg:"Registration successful", success:true}})
   } catch (err) {
       res.status(500).json({err, message:{ msg:"Error Registrating", success:false}})
   }
@@ -44,20 +55,26 @@ export const login = async (req, res) =>{
   
   try {
     if (!(phone && password) || !(phone && pin)) {
+
       return res.status(400).json({message:{msg:"All inputs required",success: false}});
     }
+
     const registeredUser = await User.findOne({phone}).exec()
     if(!registeredUser){
-      res.status(404).json({message:{msg:"User not found", success:false}})
+      res.status(404).json({message:{msg:`user with ${phone} not found`, success:false}})
     }
   } catch (err) {
     res.status(500).json({message:{msg:"Error finding User", success: false}})
   }
   try {
     const user = await User.findOne({ phone }).exec()
+
     if(user && (await bcrypt.compare(password, user.password))){
+
+      //generate an accessToken
       const accessToken= jwt.sign({id:user._id, isAdmin:user.isAdmin}, process.env.SECRET_KEY, {expiresIn:"1d"})
      const { password,updatedAt,__v, ...userInfo } = user._doc
+
      return res.status(200).json({...userInfo, accessToken, message:{msg:"Login succesful", success:true}})
     }
     else{

@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 export const getUser = async (req, res) => {
     try {
         const user = await User.findById(req.params.id)
-            .select('username firstname lastname isDriver profilePic isActive').exec()
+            .select('username firstname lastname isDriver number profilePic valideDoc isDriver balance phone').exec()
         res.status(200).json(user)
     } catch (err) {
         res.status(500).json({ err, message: { msg: "Error getting user", success: false } })
@@ -14,15 +14,24 @@ export const getUser = async (req, res) => {
 
 //GET ALL users
 export const getAllUsers = async (req, res) => {
-
+     
+    if (req.user.isAdmin && req.body.activeUser) {
         try {
-            //Get all non deleted users
-            const allUsers = await User.find({isDeleted: false})
-            .select('username firstname lastname isDriver number profilePic isActive isDeleted ').exec()
+            const allUsers = await User.find({isDeleted:false}).select('username firstname lastname isDriver number profilePic valideDoc isDriver balance phone ').exec()
             res.status(200).json(allUsers)
         } catch (err) {
             res.status(500).json({ err, message: { msg: "Error getting users", success: false } })
         }
+    } else if(!req.body.activeUser){
+        try {
+            const allUsers = await User.find({isDeleted:true}).select('username firstname lastname isDriver number profilePic valideDoc isDriver balance phone ').exec()
+            res.status(200).json(allUsers)
+        } catch (err) {
+            res.status(500).json({ err, message: { msg: "Error getting users", success: false } })
+        }
+    }else{
+        res.status(403).json({ message: { msg: "Sorry, Admins Only!", success: false } })
+    }
 }
 
 //UPDATE User
@@ -38,11 +47,10 @@ export const updateUser = async (req, res) => {
             .select('username firstname lastname isDriver number profilePic valideDoc isDriver balance phone')
             res.status(200).json({ updatedUser, message: { msg: "User updated!", success: true } })
         } catch (err) {
-
-            res.status(500).json(err)
+            res.status(500).json({ message: { msg: "Sorry, there is a server error!", success: false } })
         }
     } else {
-        res.status(403).json({ err, message: { msg: "Error updating user", success: false } })
+        res.status(403).json({ message: { msg: "Sorry, You can update only your account!", success: false } })
     }
 }
 
@@ -53,12 +61,12 @@ export const deleteUser = async (req, res) => {
             await User.findByIdAndUpdate(req.params.id,{
                 ...req.body, isDeleted: true
             }, { new: true })
-            res.status(200).json({ message: { msg: "User deleted!", success: true } })
+            res.status(200).json({ message: { msg: "User successfully deleted!", success: true } })
         } catch (err) {
             res.status(500).json(err)
         }
     } else {
-        res.status(403).json({ message: { msg: "Sorry, You can delete only your account!" } })
+        res.status(403).json({ message: { msg: "Sorry, unable to delete this account!" } })
     }
 }
 

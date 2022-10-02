@@ -1,19 +1,19 @@
 import mongoose from 'mongoose'
 
 const UserSchema = new mongoose.Schema(
-    {
+    {  
         username:{
             type: String,
-             required:true,
-              unique:true
+             required:[true, "username is required"],
+             unique:true
         },
         firstname:{
             type: String,
-            required: true
+            required:[true, "firstname is required"]
         },
         lastname:{
             type: String,
-            required: true
+            required:[true, "lastname is required"]
         },
         phone:{
             type: Number,
@@ -23,8 +23,7 @@ const UserSchema = new mongoose.Schema(
         pin:{
             type: Number,
             min:[4,"exactly 4 digits required"],
-            max:[4,"exactly digits required"],
-            default:null
+            max:[4,"exactly digits required"]
         },
         profilePic: {
             type:String,

@@ -5,8 +5,14 @@ import multer from 'multer';
 
 //Register
 export const register = async (req, res) =>{
+
+  /* declaring encrypted password */
   var encryptedPassword
-  const {username, fullName, phone, pin, profilePic,password,  isAdmin, isDriver, valideDoc} = req.body
+
+  /* Getting the data from input */
+  const {username,  firstname, lastname, phone, pin, profilePic, password,  isAdmin, isDriver, valideDoc, isDeleted, balance } = req.body 
+
+ /* checking if user exists in the database */
   try {
     const oldUser = await User.findOne({phone})
     if(oldUser){
@@ -15,19 +21,23 @@ export const register = async (req, res) =>{
   } catch (err) {
     res.status(500).json({err, message:{ msg:"Internal Error", success:false}})
   }
+  
   try {
-    encryptedPassword = await bcrypt.hash(pin, 10);
+    encryptedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
       username,
-      fullName,
+      firstname,
+      lastname,
       phone,
       pin,
       password:encryptedPassword,
       profilePic,
       valideDoc,
       isAdmin,
-      isDriver
+      isDriver,
+      isDeleted, 
+      balance
     })
       const user = await newUser.save()
       user= user.map(()=>{
@@ -43,6 +53,7 @@ export const register = async (req, res) =>{
       res.status(201).json({user
         , message:{ msg:"Registration successful", success:true}})
   } catch (err) {
+    console.log(err)
       res.status(500).json({err, message:{ msg:"Error Registrating", success:false}})
   }
 }
@@ -52,9 +63,9 @@ export const register = async (req, res) =>{
 export const login = async (req, res) =>{
 
   const {phone, password, pin} = req.body
-  
+     
   try {
-    if (!(phone && password) || !(phone && pin)) {
+    if (!(phone && password) && !(phone && pin)) {
 
       return res.status(400).json({message:{msg:"All inputs required",success: false}});
     }
@@ -84,16 +95,16 @@ export const login = async (req, res) =>{
    return res.status(500).json({message:{msg:"Error Logging", success: false}})
   }
 }
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-      cb(null, 'public/uploads')
-  }, filename: (req, file, cb) => {
-      cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
-  }
-})
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//       cb(null, 'public/uploads')
+//   }, filename: (req, file, cb) => {
+//       cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname))
+//   }
+// })
 
-export const upload = multer({ storage: storage })
-export const multipleUpload = upload
+// export const upload = multer({ storage: storage })
+// export const multipleUpload = upload
 // .fields([{name:'profilePic', maxCount:1}, {name:'validDoc', maxCount:5}])
  
 

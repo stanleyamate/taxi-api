@@ -1,9 +1,7 @@
 import { Router } from "express";
-import { updateUser, getUser, getAllUsers } from "../controllers/user.controller.js";
+import { getUser, getAllUsers, updateUser, deleteUser } from "../controllers/admin.controller.js";
 
 const router = Router()
-
-//ROUTES
 router
 .route('/')
 .get(getAllUsers)
@@ -12,5 +10,6 @@ router
 .route('/:id')
 .get(getUser)
 .put(updateUser)
+.patch(deleteUser)
 
-export default router
+export default router;

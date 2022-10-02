@@ -5,7 +5,9 @@ import morgan from 'morgan'
 // import {register, login} from "./controllers/auth.controller.js";
 import userRouter from "./routes/users.js";
 import authRouter from "./routes/auth.js";
+import adminRouter from "./routes/admin.js";
 import { verify } from "./middleware/verifyToken.js";
+import { upload } from "./controllers/user.controller.js";
 
 const app = express()
 config()
@@ -22,13 +24,21 @@ app.use(
       tokens['response-time'](req, res), 'ms'
     ].join(' ')
   }))
-app.get('/', (req, res)=> res.json({message:"welcome to taxi api"}))
+app.get('/', (req, res)=> res.json({message:"welcome to yellow taxi api"}))
 
-app.use('/auth',authRouter)
+
 // app.post('/register',register)
 // app.post('/login', login)
+app.use('/auth',authRouter)
 app.use('/api', verify)
-app.use('/api/user', userRouter)
+
+app.post('/api/upload-files', upload.array('multi-files'),(req, res)=> res.json({
+  message:"upload files",
+  mediaFiles: req
+}))
+
+app.use('/api/users', userRouter)
+app.use('/api/admin/', adminRouter)
 
 mongoose.connect(process.env.URL)
 .then(()=>console.log("DB connected"))

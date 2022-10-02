@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { register, login, multipleUpload } from "../controllers/auth.controller.js";
+import { register, login } from "../controllers/auth.controller.js";
 
 const router = Router()
 
 //Register
 router
-.route('/register', multipleUpload)
+.route('/register')
 .post(register)
 
 router

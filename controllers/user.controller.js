@@ -1,5 +1,6 @@
 import { User } from "../models/User.js";
 import bcrypt from "bcryptjs";
+import multer from "multer";
 
 //GET a single
 export const getUser = async (req, res) => {
@@ -45,21 +46,16 @@ export const updateUser = async (req, res) => {
         res.status(403).json({ err, message: { msg: "Error updating user", success: false } })
     }
 }
-
-//DELETE user
-export const deleteUser = async (req, res) => {
-    if (req.user.id === req.params.id) {
-        try {
-            await User.findByIdAndUpdate(req.params.id,{
-                ...req.body, isDeleted: true
-            }, { new: true })
-            res.status(200).json({ message: { msg: "User deleted!", success: true } })
-        } catch (err) {
-            res.status(500).json(err)
-        }
-    } else {
-        res.status(403).json({ message: { msg: "Sorry, You can delete only your account!" } })
+export const storage = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, 'public/uploads/');
+    },
+    filename: function(req, file, cb) {
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
     }
-}
+  });
+  
+ export var upload = multer({ storage: storage })
+
 
 
